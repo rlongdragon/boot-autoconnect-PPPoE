@@ -135,6 +135,26 @@ Windows IP 設定
         } else {
           nextButton.disabled = false
         }
+
+        document.getElementById("preview").innerText = `@echo off
+setlocal enabledelayedexpansion
+
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "${document.getElementById("ethernetName").value}"') do (
+    set "eth_adapter=%%a"
+)
+
+if defined eth_adapter (
+    start /wait rasdial "${document.getElementById("PPPoEName").value}" ${document.getElementById("account").value} ${document.getElementById("password").value}
+    if errorlevel 1 ( 
+        echo connect suceess
+    ) else (
+        echo connect fail
+    )
+) else (
+    echo cant fined ethernet
+)
+
+endlocal`
       })
     }
 
