@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海洋大學開機自動連線宿舍網路腳本設定工具 for windows</title>
+  <style>
+    code {
+      background-color: antiquewhite;
+      padding: 0.2em;
+      border-radius: 0.2em;
+      color: palevioletred;
+    }
+
+    .buttons {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>海洋大學開機自動連線宿舍網路腳本設定工具 for windows</h1>
+  <div id="app">
+    <div class="card">
+      <h2>說明</h2>
+      <p>
+        本腳本生成器可以生成自動連線的 windows cmd 指令腳本 (.bat) 檔案，隨後放入 windows 開機自動啟動資料夾即可完成自動開啟的腳本。
+      </p>
+      <p>
+        該腳本會在電腦開機時自動啟用。請跟著引導程式填入資訊，即可生成腳本。
+      </p>
+      <div class="buttons">
+        <input class="back" type="button" value="上一步" disabled>
+        <input class="next" type="button" value="下一步">
+      </div>
+    </div>
+    <div class="card">
+      <h2>STEP 1：取得乙太網路卡名稱</h2>
+      <p>請跟著下面步驟操作，取得指定資料後輸入至下方輸入框</p>
+      <ol>
+        <li>[win] + [R]</li>
+        <li>在彈出視窗中輸入<code>cmd</code></li>
+        <li>在彈出的命令提示字元視窗中輸入<code>ipconfig</code>並執行
+          會出現下面資訊
+          <pre>PS C:\Users\rlongdragon> ipconfig
+
+Windows IP 設定
+...
+省略
+...
+
+乙太網路卡 乙太網路 2:
+
+    連線特定 DNS 尾碼 . . . . . . . . :
+    連結-本機 IPv6 位址 . . . . . . . : XXXX::XXXX:XXXX:XXXX:XXX%X
+    自動設定 IPv4 位址 . . . . . . . .: XXX.XXX.XXX.XXX
+    子網路遮罩 . . . . . . . . . . . .: 255.255.0.0
+    預設閘道 . . . . . . . . . . . . .:
+
+...</pre>
+        </li>
+        <li>找到"乙太網路"字樣，並複製貼網路介面卡名稱到下面輸入框(不含冒號)，以這次的範例是<code>乙太網路卡 乙太網路 2</code></code></li>
+      </ol>
+      <label for="ethernetName">輸入網路介面卡名稱：</label>
+      <input id="ethernetName" style="width: 100%;">
+      <div class="buttons">
+        <input class="back" type="button" value="上一步">
+        <input class="next" type="button" value="下一步">
+      </div>
+    </div>
+    <div class="card">
+      <h2>STEP 2：取得撥號設定檔案名稱</h2>
+      <ol>
+        <li>[win] + [i] 打開設定</li>
+        <li>點選「網路和網際網路」</li>
+        <li>點選「撥號」</li>
+        <li>找到你的PPPoE名稱並填入下方輸入框</li>
+      </ol>
+      <p>*名稱強烈建議使用英文名稱，可以避免編碼問題造成的錯。如果你先前沒有指定名稱，預設是中文名稱，請根據宿舍公告之教學建立一個英文名稱的PPPoE連線。</p>
+      <label for="PPPoEName">PPPoE名稱：</label>
+      <input id="PPPoEName" style="width: 100%;">
+      <div class="buttons">
+        <input class="back" type="button" value="上一步">
+        <input class="next" type="button" value="下一步">
+      </div>
+    </div>
+    <div class="card">
+      <h2>STEP 3：設定帳號密碼</h2>
+      <ol>
+        <li>根據宿舍公告填入帳號跟密碼</li>
+      </ol>
+      <label for="account">帳號：</label>
+      <input id="account" style="width: 100%;" placeholder="XXXXXX@hinet.net">
+
+      <label for="password">密碼：</label>
+      <input id="password" style="width: 100%;">
+      <div class="buttons">
+        <input class="back" type="button" value="上一步">
+        <input class="next" type="button" value="下一步">
+      </div>
+    </div>
+    <div class="card">
+      <h2>STEP 4：下載腳本檔案</h2>
+      <p>腳本內容預覽</p>
+      <pre id="preview"></pre>
+      <input id="download" type="button" value="下載">
+      <div class="buttons">
+        <input class="back" type="button" value="上一步">
+        <input class="next" type="button" value="下一步">
+      </div>
+    </div>
+    <div class="card">
+      <h2>STEP 5：將腳本放入 windows 的開啟啟動資料夾</h2>
+      <ol>
+        <li>[win] + [R]</li>
+        <li>在彈出視窗中輸入<code>%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup</code></li>
+        <li>將下載的檔案拖入資料夾即可</li>
+      </ol>
+      <div class="buttons">
+        <input class="back" type="button" value="上一步">
+        <input class="next" type="button" value="下一步" disabled>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function nextButtonHandler(inputElementId, nextButtonCardIndex) {
+      let inputElement = document.getElementById(inputElementId)
+      let nextButton = (document.getElementsByClassName("card")[nextButtonCardIndex]
+        .querySelectorAll(".buttons > input[type=button]"))[1]
+      inputElement.addEventListener("input", () => {
+        if (inputElement.value == "") {
+          nextButton.disabled = true
+        } else {
+          nextButton.disabled = false
+        }
+      })
+    }
+
+    function downloadBatFile(filename, content) {
+      const element = document.createElement('a');
+      const file = new Blob([content], { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = filename;
+      document.body.appendChild(element); // Required for Firefox
+      element.click();
+    }
+  </script>
+  <script>
+    let cards = document.getElementsByClassName("card")
+    for (let i = 0; i < cards.length; i++) {
+      let card = cards[i]
+
+      card.style.display = "none"
+      let buttons = card.querySelectorAll(".buttons > input[type=button]")
+      console.log(buttons)
+      if (i > 0) {
+        buttons[0].addEventListener("click", () => {
+          cards[i].style.display = "none"
+          cards[i - 1].style.display = "block"
+        })
+      }
+      if (i < cards.length - 1) {
+        buttons[1].addEventListener("click", () => {
+          cards[i].style.display = "none"
+          cards[i + 1].style.display = "block"
+        })
+      }
+      buttons[1].disabled = true
+    }
+    cards[0].style.display = "block";
+    (cards[0].querySelectorAll(".buttons > input[type=button]"))[1].disabled = false
+
+    for (i of [["ethernetName", 1], ["PPPoEName", 2], ["account", 3], ["password", 3]]) {
+      nextButtonHandler(i[0], i[1])
+    }
+
+    document.getElementById("download").addEventListener("click", () => {
+      const filename = 'connectToPPPoE.bat';
+      const content = `@echo off
+setlocal enabledelayedexpansion
+
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "${document.getElementById("ethernetName").value}"') do (
+    set "eth_adapter=%%a"
+)
+
+if defined eth_adapter (
+    start /wait rasdial "${document.getElementById("PPPoEName").value}" ${document.getElementById("account").value} ${document.getElementById("password").value}
+    if errorlevel 1 ( 
+        echo connect suceess
+    ) else (
+        echo connect fail
+    )
+) else (
+    echo cant fined ethernet
+)
+
+endlocal`;
+
+      downloadBatFile(filename, content);
+
+      (cards[4].querySelectorAll(".buttons > input[type=button]"))[1].disabled = false
+    })
+  </script>
+</body>
+
+</html>
